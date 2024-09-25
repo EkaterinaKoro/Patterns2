@@ -6,13 +6,14 @@ import io.restassured.filter.log.LogDetail;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import lombok.Value;
-import lombok.val;
 
 import java.util.Locale;
 
 import static io.restassured.RestAssured.given;
 
 public class DataGenerator {
+
+    private static final Faker faker = new Faker(new Locale("en"));
 
     private static final RequestSpecification requestSpec = new RequestSpecBuilder()
             .setBaseUri("http://localhost")
@@ -22,28 +23,29 @@ public class DataGenerator {
             .log(LogDetail.ALL)
             .build();
 
-    private static final Faker faker = new Faker(new Locale("en"));
+
 
     private DataGenerator() {
     }
 
-    private static void sendRequest(Registration.RegistrationDto user) {
-        given()
-                .spec(requestSpec)
-                .body(user)
-                .when()
-                .post("/api/system/users")
-                .then()
-                .statusCode(200);
+    private static void makeRequest(Registration.RegistrationDto registrationUsers) {
+        given() // "дано"
+                .spec(requestSpec) // указываем, какую спецификацию используем
+                .body(registrationUsers) // передаём в теле объект, который будет преобразован в JSON
+                .when() // "когда"
+                .post("/api/system/users") // на какой путь, относительно BaseUri отправляем запрос
+                .then() // "тогда ожидаем"
+                .statusCode(200); // код 200 OK
     }
 
     public static String getRandomLogin() {
         String login = faker.name().username();
         return login;
+
     }
 
     public static String getRandomPassword() {
-        String password = faker.internet().password(10, 14, true, true, true);
+        String password = faker.internet().password();
         return password;
     }
 
@@ -52,13 +54,20 @@ public class DataGenerator {
         }
 
         public static RegistrationDto getUser(String status) {
-            val user = new RegistrationDto(getRandomLogin(), getRandomPassword(), status);
+            RegistrationDto user = new RegistrationDto(getRandomLogin(), getRandomPassword(), status);
+            makeRequest(user);
             return user;
         }
 
         public static RegistrationDto getRegisteredUser(String status) {
-            val registeredUser = getUser(status);
-            return registeredUser;
+            RegistrationDto user = new RegistrationDto(getRandomLogin(), getRandomPassword(), status);
+            makeRequest(user);
+            return user;
+        }
+
+        public static RegistrationDto getNotRegisteredUser(String status) {
+            RegistrationDto user = new RegistrationDto(getRandomLogin(), getRandomPassword(), status);
+            return user;
         }
 
         @Value

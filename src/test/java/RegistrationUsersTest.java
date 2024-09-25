@@ -1,6 +1,5 @@
 import com.codeborne.selenide.Condition;
 import com.codeborne.selenide.Configuration;
-import data.DataGenerator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
@@ -8,13 +7,10 @@ import org.junit.jupiter.api.DisplayName;
 import java.time.Duration;
 
 import static com.codeborne.selenide.Condition.*;
-import static com.codeborne.selenide.Selectors.byText;
 import static com.codeborne.selenide.Selenide.$;
 import static com.codeborne.selenide.Selenide.open;
-import static data.DataGenerator.Registration.getRegisteredUser;
-import static data.DataGenerator.Registration.getUser;
-import static data.DataGenerator.getRandomLogin;
-import static data.DataGenerator.getRandomPassword;
+import static data.DataGenerator.*;
+import static data.DataGenerator.Registration.*;
 
 public class RegistrationUsersTest {
 
@@ -32,19 +28,20 @@ public class RegistrationUsersTest {
         $("[data-test-id='login'] input").setValue(registeredUser.getLogin());
         $("[data-test-id='password'] input").setValue(registeredUser.getPassword());
         $("button.button").click();
-        $("h2").shouldHave(Condition.text("Интернет Банк")).shouldBe(Condition.visible);
+        $("h2").shouldHave(Condition.text("Личный кабинет")).shouldBe(Condition.visible);
 
     }
+
 
     @Test
     @DisplayName("Should get error message if login with not registered user")
     void shouldGetErrorIfNotRegisteredUser() {
-        var notRegisteredUser = getUser("active");
+        var notRegisteredUser = getNotRegisteredUser("active");
         $("[data-test-id='login'] input").setValue(notRegisteredUser.getLogin());
         $("[data-test-id='password'] input").setValue(notRegisteredUser.getPassword());
         $("button.button").click();
         $("[data-test-id='error-notification'] .notification__content")
-                .shouldHave(Condition.text("Ошибка! Неверно указан логин или пароль"), Duration.ofSeconds(10))
+                .shouldHave(Condition.text("Ошибка! Неверно указан логин или пароль"))
                 .shouldBe((Condition.visible));
     }
 
@@ -56,7 +53,7 @@ public class RegistrationUsersTest {
         $("[data-test-id='password'] input").setValue(blockedUser.getPassword());
         $("button.button").click();
         $("[data-test-id='error-notification'] .notification__content")
-                .shouldHave(Condition.text("Ошибка! Неверно указан логин или пароль"), Duration.ofSeconds(10))
+                .shouldHave(Condition.text("Ошибка! Пользователь заблокирован"), Duration.ofSeconds(10))
                 .shouldBe((Condition.visible));
     }
 
